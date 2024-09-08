@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* styles/globals.css */
+@keyframes textAnimation {
+    0% { transform: translateY(-10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  
+  .animate-text {
+    animation: textAnimation 0.5s ease-out;
+  }
+  
