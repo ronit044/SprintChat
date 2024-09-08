@@ -96,19 +96,26 @@ export const addTask = async (uid, task, column) => {
     [column]: arrayUnion(task)
   });
 };
-
 export const createTask = async (uid, task, column) => {
   const docRef = doc(db, 'tasks', uid);
-  try{
-  await updateDoc(docRef, {
-    [column]: arrayUnion(task)
-  });
-  console.log("task added to firestore")
-}catch(e){
-  console.log(e);
-}
-};
+  try {
+    const docSnap = await getDoc(docRef);
 
+    if (docSnap.exists()) {
+      await updateDoc(docRef, {
+        [column]: arrayUnion(task)
+      });
+      console.log("Task added to Firestore");
+    } else {
+      await setDoc(docRef, {
+        [column]: [task]
+      });
+      console.log("New document created and task added to Firestore");
+    }
+  } catch (e) {
+    console.error("Error updating Firestore:", e);
+  }
+};
 export const deleteTask = async (uid, task) => {
   const docRef = doc(db, 'tasks', uid);
   await updateDoc(docRef, {
