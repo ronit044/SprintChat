@@ -6,10 +6,10 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from "@/firebase/firebaseConfig";
 export const createUser = async (email, password, username) => {
-  
+
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const { uid } = userCredential.user;
@@ -47,7 +47,7 @@ export const fetchDocumentById = async (collectionName, uid) => {
   try {
     const docRef = doc(db, collectionName, uid);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       return docSnap.data();
     } else {
@@ -64,7 +64,7 @@ export const fetchAllDocuments = async (collectionName) => {
   try {
     const collectionRef = collection(db, collectionName);
     const querySnapshot = await getDocs(collectionRef);
-    
+
     const documents = querySnapshot.docs.map(doc => doc.data());
     return documents;
   } catch (error) {
@@ -75,4 +75,46 @@ export const fetchAllDocuments = async (collectionName) => {
 
 export const onAuthStateChange = (callback) => {
   onAuthStateChanged(auth, callback);
+};
+
+
+
+export const fetchTasks = async (uid) => {
+  const docRef = doc(db, 'tasks', uid);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data();
+  } else {
+    console.log('No such document!');
+    return {};
+  }
+};
+
+export const addTask = async (uid, task, column) => {
+  const docRef = doc(db, 'tasks', uid);
+  await updateDoc(docRef, {
+    [column]: arrayUnion(task)
+  });
+};
+
+export const createTask = async (uid, task, column) => {
+  const docRef = doc(db, 'tasks', uid);
+  try{
+  await updateDoc(docRef, {
+    [column]: arrayUnion(task)
+  });
+  console.log("task added to firestore")
+}catch(e){
+  console.log(e);
+}
+};
+
+export const deleteTask = async (uid, task) => {
+  const docRef = doc(db, 'tasks', uid);
+  await updateDoc(docRef, {
+    backlog: arrayRemove(task),
+    todo: arrayRemove(task),
+    active: arrayRemove(task),
+    completed: arrayRemove(task)
+  });
 };

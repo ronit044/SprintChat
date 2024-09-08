@@ -4,24 +4,23 @@ import { FaUser, FaLock, FaGoogle, FaEnvelope } from 'react-icons/fa';
 import { createUser, loginUser } from '@/utils/firbaseUtils';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
-import { fetchDocumentById } from '@/utils/firbaseUtils';
+import ProtectedRoute from '@/components/authComponents/ProtectRedundantLogin';
+import { useAuth } from '@/components/authComponents/authProvider';
+import Loader from '@/components/loader';
 const LoginSignup = () => {
+  const { isLoggedIn, loading } = useAuth;
   const mode = useSelector((state) => state.theme.mode);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState(''); // For signup only
   const [error, setError] = useState('');
-  const router=useRouter();
   const handleAuth = async () => {
     try {
       if (isLogin) {
         const response = await loginUser(email, password);
         if (response.success) {
           toast.success('Login successful!');
-          console.log(await fetchDocumentById("users",response.uid))
-          router.push("/");
         } else {
           toast.error(response.error);
         }
@@ -29,7 +28,6 @@ const LoginSignup = () => {
         const response = await createUser(email, password, username);
         if (response.success) {
           toast.success('Signup successful!');
-          router.push("/");
         } else {
           toast.error(response.error);
         }
@@ -39,8 +37,12 @@ const LoginSignup = () => {
       toast.error('An error occurred.');
     }
   };
+  if(loading){
+    return <Loader></Loader>
+  }
 
   return (
+    <ProtectedRoute>
     <div className={`min-h-screen flex items-center justify-center ${mode === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <div className={`p-6 rounded-lg shadow-lg border ${mode === 'dark' ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'} w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg transition duration-300`}>
         <h2 className={`text-center text-2xl font-bold mb-4 ${mode === 'dark' ? 'text-white' : 'text-gray-800'}`}>
@@ -98,6 +100,7 @@ const LoginSignup = () => {
       </div>
 
     </div>
+    </ProtectedRoute>
   );
 };
 

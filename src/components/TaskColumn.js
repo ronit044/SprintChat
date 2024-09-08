@@ -1,10 +1,10 @@
-"use client"
+"use client";
 import React, { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import TaskItem from './TaskItem';
 import { FaPlus } from 'react-icons/fa';
 
-const TaskColumn = ({ title, tasks, setTasks, onTaskMove, type, mode }) => {
+const TaskColumn = ({ title, tasks = [], onTaskMove, onTaskAdd, type, mode }) => {
   const [newTask, setNewTask] = useState('');
 
   const [{ isOver }, drop] = useDrop({
@@ -17,7 +17,8 @@ const TaskColumn = ({ title, tasks, setTasks, onTaskMove, type, mode }) => {
 
   const handleAddTask = () => {
     if (newTask.trim()) {
-      setTasks((prev) => [...prev, newTask]);
+      const task = { task: newTask.trim() };
+      onTaskAdd(task, type);
       setNewTask('');
     }
   };
@@ -34,7 +35,7 @@ const TaskColumn = ({ title, tasks, setTasks, onTaskMove, type, mode }) => {
       }`}>
         {title} ({tasks.length})
       </h2>
-      
+
       {tasks.map((task, index) => (
         <TaskItem key={index} task={task} mode={mode} />
       ))}

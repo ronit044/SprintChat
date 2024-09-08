@@ -18,7 +18,7 @@ const authSlice = createSlice({
         // If user is signed in, update state with user's details
         state.user.uid = action.payload.uid;
         state.user.email = action.payload.email;
-        state.user.name = action.payload.displayName || null; // Firebase displayName (optional)
+        state.user.name = action.payload.name; // Firebase displayName (optional)
       } else {
         // If no user, reset the state to null
         state.user = {
