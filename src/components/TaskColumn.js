@@ -36,23 +36,27 @@ const TaskColumn = ({ title, tasks = [], onTaskMove, onTaskAdd, type, mode }) =>
         {title} ({tasks.length})
       </h2>
 
+      {/* Task List */}
       {tasks.map((task, index) => (
         <TaskItem key={index} task={task} mode={mode} />
       ))}
 
-      <div className="mt-4 flex items-center">
-        <input
-          type="text"
+      {/* Add New Task */}
+      <div className="mt-4 flex flex-col">
+        <textarea
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
-          placeholder="Add new task"
-          className={`p-2 w-full rounded-l-md ${mode === 'dark' ? 'bg-gray-600 text-white' : 'bg-white text-gray-800'}`}
+          placeholder="Add a new task..."
+          rows="2" // Starting height
+          className={`p-2 w-full resize-none overflow-y-auto rounded-md ${mode === 'dark' ? 'bg-gray-600 text-white' : 'bg-white text-gray-800'} 
+            border border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300`}
+          style={{ maxHeight: '150px' }} // Limits the textarea height
         />
         <button
           onClick={handleAddTask}
-          className={`p-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-700 transition duration-300`}
+          className={`mt-2 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 flex items-center justify-center`}
         >
-          <FaPlus />
+          <FaPlus className="mr-1" /> Add Task
         </button>
       </div>
     </div>

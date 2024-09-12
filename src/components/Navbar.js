@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '@/redux/themeSlice';
 import { FaSun, FaMoon, FaUser, FaSignInAlt, FaUserPlus, FaBars } from 'react-icons/fa';
@@ -9,8 +9,55 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/authComponents/authProvider';
 import Loader from '@/components/loader';
 
+const AutoTyper = ({ mode }) => {
+  const text = "TaskFlow";
+  const [displayedText, setDisplayedText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const handleTyping = () => {
+      if (isDeleting) {
+        if (displayedText.length > 0) {
+          setDisplayedText(prev => prev.slice(0, -1));
+        } else {
+          setIsDeleting(false);
+          setIndex(0); // Reset index to start typing again
+        }
+      } else {
+        if (displayedText.length < text.length) {
+          setDisplayedText(prev => prev + text.charAt(index));
+          setIndex(index + 1);
+        } else {
+          setTimeout(() => setIsDeleting(true), 2000); // Wait before deleting
+        }
+      }
+    };
+    const typingSpeed = isDeleting ? 50 : 100;
+    const typingInterval = setInterval(handleTyping, typingSpeed);
+
+    return () => clearInterval(typingInterval);
+  }, [displayedText, isDeleting, index]);
+
+  return (
+    <h1
+      className={`text-lg sm:text-xl md:text-2xl lg:text-2xl font-bold ${mode === 'dark' ? 'text-yellow-500' : 'text-black'} ${isDeleting ? 'italic' : ''}`}
+      style={{
+        textShadow: mode === 'dark' ? '2px 2px 8px rgba(0, 0, 0, 0.6)' : '2px 2px 8px rgba(255, 255, 0, 0.6)', // Black shadow for dark, yellow shadow for light
+        border: `2px solid ${mode === 'dark' ? 'yellow' : '#FFD700'}`, // More intense yellow in light mode
+        borderRadius: '8px',
+        padding: '0 8px',
+        display: 'inline-block',
+      }}
+    >
+      {displayedText}
+    </h1>
+  );
+};
+
+
 const Navbar = () => {
-  const { loading } = useAuth;
+  const { loading } = useAuth();
   const dispatch = useDispatch();
   const router = useRouter();
   const mode = useSelector((state) => state.theme.mode);
@@ -35,10 +82,8 @@ const Navbar = () => {
   }
 
   return (
-    <div className={`p-2 xl:p-4 flex justify-between items-center border-b ${mode === 'dark' ? 'bg-gray-800' : 'bg-white'} transition duration-300 w-full`}>
-      <h1 className={`text-lg sm:text-xl md:text-2xl lg:text-2xl font-bold ${mode === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-        Kanban Board
-      </h1>
+    <div className={`p-2 xl:p-4 flex justify-between items-center border-b ${mode === 'dark' ? 'bg-gray-800' : 'bg-white border-black'} transition duration-300 w-full`}>
+      <AutoTyper mode={mode}/>
       <div className="flex items-center gap-4">
         {/* Theme Toggle Button */}
         <button onClick={() => dispatch(toggleTheme())} className="text-xl sm:text-2xl md:text-3xl">
@@ -61,7 +106,7 @@ const Navbar = () => {
           {user.email ? (
             <div className="flex items-center gap-4 cursor-pointer">
               {/* Username Box */}
-              <div className={`relative px-4 py-1 bg-${mode === 'dark' ? 'gray-700' : 'gray-100'} rounded-lg shadow-md`}>
+              <div className={`relative px-4 py-1 bg-${mode === 'dark' ? 'gray-700' : 'gray-100'} rounded-lg shadow-md border-${mode === 'dark' ? '' : 'black'}`}>
                 <FaUser className={`absolute left-2 top-1/2 transform -translate-y-1/2 text-lg ${mode === 'dark' ? 'text-white' : 'text-gray-800'}`} />
                 <span className={`ml-8 text-lg sm:text-xl ${mode === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                   {user.name}
@@ -88,7 +133,7 @@ const Navbar = () => {
 
         {/* Dropdown for smaller screens */}
         {menuOpen && (
-          <div className={`absolute right-4 top-16 bg-${mode === 'dark' ? 'gray-800' : 'white'} rounded-md shadow-lg p-4 flex flex-col items-start gap-2 md:hidden`}>
+          <div className={`absolute right-4 top-16 bg-${mode === 'dark' ? 'gray-800' : 'white'} rounded-md shadow-lg p-4 flex flex-col items-start gap-2 md:hidden border-${mode === 'dark' ? '' : 'black'}`}>
             {user.email ? (
               <>
                 <div className="flex items-center gap-2">

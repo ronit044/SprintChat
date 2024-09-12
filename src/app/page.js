@@ -8,8 +8,8 @@ import DeleteZone from '../components/DeleteZone';
 import { fetchTasks, addTask, deleteTask, createTask } from '@/utils/firbaseUtils';
 import Loader from '@/components/loader';
 import { useAuth } from '@/components/authComponents/authProvider';
-import { setBacklogTasks, setTodoTasks, setActiveTasks, setCompletedTasks } from '@/redux/taskSlice'; // Adjust the import based on your slice path
-
+import { setBacklogTasks, setTodoTasks, setActiveTasks, setCompletedTasks } from '@/redux/taskSlice'; 
+import { toast } from 'react-toastify';
 const Home = () => {
   const { isLoggedIn, loading } = useAuth();
   const uid = useSelector((state) => state.auth.user.uid);
@@ -28,6 +28,7 @@ const Home = () => {
           dispatch(setActiveTasks( []));
           dispatch(setCompletedTasks( []));
       }
+      emptyTasks();
     }
   }, [isLoggedIn]);
 
@@ -51,12 +52,21 @@ const Home = () => {
 
   const onTaskMove = async (task, targetColumn) => {
     const { task: taskItem } = task;
+    if (
+      (targetColumn === 'backlog' && backlogTasks.includes(taskItem)) ||
+      (targetColumn === 'todo' && todoTasks.includes(taskItem)) ||
+      (targetColumn === 'active' && activeTasks.includes(taskItem)) ||
+      (targetColumn === 'completed' && completedTasks.includes(taskItem))
+    ) {
+      toast.error("Task already exists in the target column.");
+      return;
+    }
+
     dispatch(setBacklogTasks(backlogTasks.filter((t) => t !== taskItem)));
     dispatch(setTodoTasks(todoTasks.filter((t) => t !== taskItem)));
     dispatch(setActiveTasks(activeTasks.filter((t) => t !== taskItem)));
     dispatch(setCompletedTasks(completedTasks.filter((t) => t !== taskItem)));
 
-    // Add task to the target column
     switch (targetColumn) {
       case 'backlog':
         dispatch(setBacklogTasks([...backlogTasks, taskItem]));
