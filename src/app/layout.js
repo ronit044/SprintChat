@@ -18,7 +18,7 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-  title: "Sprint Chat",
+  title: "TaskFlow",
 };
 
 export default function RootLayout({ children }) {
